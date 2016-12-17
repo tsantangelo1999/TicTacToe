@@ -15,6 +15,8 @@ public class Main
         while(!(response.equalsIgnoreCase("player") || response.equalsIgnoreCase("computer")))
         {
             response = input.nextLine();
+            if(!(response.equalsIgnoreCase("player") || response.equalsIgnoreCase("computer")))
+                System.out.println("Invalid input.");
         }
         boolean playerTurn = response.equalsIgnoreCase("player");
         String winner = null;
@@ -37,7 +39,10 @@ public class Main
                         if(numBoard[row - 1][column - 1] != 0)
                             throw new Exception();
                         else
+                        {
                             numBoard[row - 1][column - 1] = 1;
+                            board[row - 1][column - 1] = numBoard[row - 1][column - 1] == 1 ? "X" : "O";
+                        }
                         break;
                     }
                     catch(Exception e)
@@ -45,12 +50,20 @@ public class Main
 
                     }
                 }
+                playerTurn = !playerTurn;
             }
             else
             {
-                
+                System.out.println("Computer passes!");
+                playerTurn = !playerTurn;
             }
+            winner = findWinner();
+            displayBoard();
         }
+        if(winner.equals("X"))
+            System.out.println("You win!");
+        if(winner.equals("O"))
+            System.out.println("You lose!");
     }
 
     public static void displayBoard()
