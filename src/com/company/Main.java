@@ -19,6 +19,8 @@ public class Main
                 System.out.println("Invalid input.");
         }
         boolean playerTurn = response.equalsIgnoreCase("player");
+        String playerLetter = playerTurn ? "X" : "O";
+        String computerLetter = playerTurn ? "O" : "X";
         String winner = null;
         displayBoard();
         while(winner == null)
@@ -41,7 +43,7 @@ public class Main
                         else
                         {
                             numBoard[row - 1][column - 1] = 1;
-                            board[row - 1][column - 1] = numBoard[row - 1][column - 1] == 1 ? "X" : "O";
+                            board[row - 1][column - 1] = playerLetter;
                         }
                         break;
                     }
@@ -60,9 +62,9 @@ public class Main
             winner = findWinner();
             displayBoard();
         }
-        if(winner.equals("X"))
+        if(winner.equals(playerLetter))
             System.out.println("You win!");
-        if(winner.equals("O"))
+        if(winner.equals(computerLetter))
             System.out.println("You lose!");
     }
 
@@ -94,7 +96,6 @@ public class Main
             return board[0][0];
         else if(numBoard[0][2] == numBoard[1][1] && numBoard[1][1] == numBoard[2][0] && numBoard[0][2] != 0)
             return board[0][2];
-        else
-            return null;
+        return null;
     }
 }
