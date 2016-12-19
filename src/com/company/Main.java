@@ -5,27 +5,47 @@ import java.util.Scanner;
 public class Main
 {
     public static String[][] board = {{" ", " ", " "}, {" ", " ", " "}, {" ", " ", " "}};
-    public static int[][] numBoard = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    public static int[][] numBoard = {{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}};
 
     public static void main(String[] args)
     {
         Scanner input = new Scanner(System.in);
-        System.out.println("Will the PLAYER or the COMPUTER go first?");
+        System.out.println("Choose your game mode:");
+        System.out.println("1: Player vs. Player\n2: Player vs. Computer\n3: Computer vs. Computer");
+        int mode = 0;
+        Scanner modePicker = new Scanner(System.in);
+        while(!(mode > 0 && mode < 4))
+        {
+            try
+            {
+                mode = modePicker.nextInt();
+                if(mode <= 0 || mode >= 4)
+                    throw new Exception();
+            }
+            catch(Exception e)
+            {
+                System.out.println("Invalid input.");
+            }
+        }
+        boolean p1Human = (mode > 0 && mode < 3);
+        boolean p2Human = (mode > 0 && mode < 2);
+        System.out.println("Will PLAYER1 or PLAYER2 go first?");
         String response = "";
-        while(!(response.equalsIgnoreCase("player") || response.equalsIgnoreCase("computer")))
+        while(!(response.equalsIgnoreCase("player1") || response.equalsIgnoreCase("player2")))
         {
             response = input.nextLine();
-            if(!(response.equalsIgnoreCase("player") || response.equalsIgnoreCase("computer")))
+            if(!(response.equalsIgnoreCase("player1") || response.equalsIgnoreCase("player2")))
                 System.out.println("Invalid input.");
         }
-        boolean playerTurn = response.equalsIgnoreCase("player");
-        String playerLetter = playerTurn ? "X" : "O";
-        String computerLetter = playerTurn ? "O" : "X";
+        boolean p1Turn = response.equalsIgnoreCase("player1");
+        String p1Letter = "X";
+        String p2Letter = "O";
         String winner = null;
+        int turns = 0;
         displayBoard();
         while(winner == null)
         {
-            if(playerTurn)
+            if(p1Turn && p1Human || !p1Turn && p2Human)
             {
                 while(true)
                 {
@@ -38,12 +58,13 @@ public class Main
                         int row = readThing.nextInt();
                         int column = readThing.nextInt();
                         readThing.close();
-                        if(numBoard[row - 1][column - 1] != 0)
+                        if(numBoard[row - 1][column - 1] != -1)
                             throw new Exception();
                         else
                         {
-                            numBoard[row - 1][column - 1] = 1;
-                            board[row - 1][column - 1] = playerLetter;
+                            numBoard[row - 1][column - 1] = p1Turn ? 0 : 1;
+                            board[row - 1][column - 1] = p1Turn ? p1Letter : p2Letter;
+                            turns++;
                         }
                         break;
                     }
@@ -52,20 +73,63 @@ public class Main
 
                     }
                 }
-                playerTurn = !playerTurn;
+                p1Turn = !p1Turn;
             }
             else
             {
-                System.out.println("Computer passes!");
-                playerTurn = !playerTurn;
+                if(turns == 0)
+                {
+                    int row = (int)(Math.random() * 2) * 2;
+                    int column = (int)(Math.random() * 2) * 2;
+                    numBoard[row][column] = p1Turn ? 0 : 1;
+                    board[row][column] = p1Turn ? p1Letter : p2Letter;
+                }
+                int[] play = p1Turn ? forcedPlay(0) : forcedPlay(1);
+                if(play != null)
+                {
+                    numBoard[play[0]][play[1]] = p1Turn ? 0 : 1;
+                    board[play[0]][play[1]] = p1Turn ? p1Letter : p2Letter;
+                }
+                else if(true)
+                {
+
+                }
+                System.out.println("Computer plays! Your turn!\n");
+                p1Turn = !p1Turn;
             }
             winner = findWinner();
             displayBoard();
         }
-        if(winner.equals(playerLetter))
-            System.out.println("You win!");
-        if(winner.equals(computerLetter))
-            System.out.println("You lose!");
+        if(winner.equals(p1Letter))
+            System.out.println("Player 1 wins!");
+        if(winner.equals(p2Letter))
+            System.out.println("Player 2 wins!");
+    }
+
+    public static int[] forcedPlay(int turnNum)
+    {
+        for(int i = 0; i <= 1; i++)
+        {
+            for(int j = 0; j < 3; j++)
+            {
+                if(numBoard[j][0] == numBoard[j][1] && numBoard[j][0] == (turnNum + i) % 2)
+                    return new int[] {j, 2};
+                if(numBoard[j][0] == numBoard[j][2] && numBoard[j][0] == (turnNum + i) % 2)
+                    return new int[] {j, 1};
+                if(numBoard[j][2] == numBoard[j][1] && numBoard[j][2] == (turnNum + i) % 2)
+                    return new int[] {j, 0};
+            }
+            for(int j = 0; j < 3; j++)
+            {
+                if(numBoard[0][j] == numBoard[1][j] && numBoard[0][j] == (turnNum + i) % 2)
+                    return new int[] {2, j};
+                if(numBoard[0][j] == numBoard[2][j] && numBoard[0][j] == (turnNum + i) % 2)
+                    return new int[] {1, j};
+                if(numBoard[2][j] == numBoard[1][j] && numBoard[2][j] == (turnNum + i) % 2)
+                    return new int[] {0, j};
+            }
+        }
+        return null;
     }
 
     public static void displayBoard()
@@ -80,21 +144,21 @@ public class Main
 
     public static String findWinner()
     {
-        if(numBoard[0][0] == numBoard[0][1] && numBoard[0][1] == numBoard[0][2] && numBoard[0][0] != 0)
+        if(numBoard[0][0] == numBoard[0][1] && numBoard[0][1] == numBoard[0][2] && numBoard[0][0] != -1)
             return board[0][0];
-        else if(numBoard[1][0] == numBoard[1][1] && numBoard[1][1] == numBoard[1][2] && numBoard[1][0] != 0)
+        else if(numBoard[1][0] == numBoard[1][1] && numBoard[1][1] == numBoard[1][2] && numBoard[1][0] != -1)
             return board[1][0];
-        else if(numBoard[2][0] == numBoard[2][1] && numBoard[2][1] == numBoard[2][2] && numBoard[2][0] != 0)
+        else if(numBoard[2][0] == numBoard[2][1] && numBoard[2][1] == numBoard[2][2] && numBoard[2][0] != -1)
             return board[2][0];
-        else if(numBoard[0][0] == numBoard[1][0] && numBoard[1][0] == numBoard[2][0] && numBoard[0][0] != 0)
+        else if(numBoard[0][0] == numBoard[1][0] && numBoard[1][0] == numBoard[2][0] && numBoard[0][0] != -1)
             return board[0][0];
-        else if(numBoard[0][1] == numBoard[1][1] && numBoard[1][1] == numBoard[2][1] && numBoard[0][1] != 0)
+        else if(numBoard[0][1] == numBoard[1][1] && numBoard[1][1] == numBoard[2][1] && numBoard[0][1] != -1)
             return board[0][1];
-        else if(numBoard[0][2] == numBoard[1][2] && numBoard[1][2] == numBoard[2][2] && numBoard[0][2] != 0)
+        else if(numBoard[0][2] == numBoard[1][2] && numBoard[1][2] == numBoard[2][2] && numBoard[0][2] != -1)
             return board[0][2];
-        else if(numBoard[0][0] == numBoard[1][1] && numBoard[1][1] == numBoard[2][2] && numBoard[0][0] != 0)
+        else if(numBoard[0][0] == numBoard[1][1] && numBoard[1][1] == numBoard[2][2] && numBoard[0][0] != -1)
             return board[0][0];
-        else if(numBoard[0][2] == numBoard[1][1] && numBoard[1][1] == numBoard[2][0] && numBoard[0][2] != 0)
+        else if(numBoard[0][2] == numBoard[1][1] && numBoard[1][1] == numBoard[2][0] && numBoard[0][2] != -1)
             return board[0][2];
         return null;
     }
