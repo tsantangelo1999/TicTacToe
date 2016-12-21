@@ -1,5 +1,7 @@
 package com.company;
 
+import java.util.Arrays;
+
 import java.util.Scanner;
 
 public class Main
@@ -92,7 +94,7 @@ public class Main
                 }
                 else if(true)
                 {
-
+                    int[] bestPlay = p1Turn ? calculateFitness(0) : calculateFitness(1);
                 }
                 System.out.println("Computer plays! Your turn!\n");
                 p1Turn = !p1Turn;
@@ -112,24 +114,60 @@ public class Main
         {
             for(int j = 0; j < 3; j++)
             {
-                if(numBoard[j][0] == numBoard[j][1] && numBoard[j][0] == (turnNum + i) % 2)
+                if(numBoard[j][0] == numBoard[j][1] && numBoard[j][0] == (turnNum + i) % 2 && numBoard[j][2] == -1)
                     return new int[] {j, 2};
-                if(numBoard[j][0] == numBoard[j][2] && numBoard[j][0] == (turnNum + i) % 2)
+                if(numBoard[j][0] == numBoard[j][2] && numBoard[j][0] == (turnNum + i) % 2 && numBoard[j][1] == -1)
                     return new int[] {j, 1};
-                if(numBoard[j][2] == numBoard[j][1] && numBoard[j][2] == (turnNum + i) % 2)
+                if(numBoard[j][2] == numBoard[j][1] && numBoard[j][2] == (turnNum + i) % 2 && numBoard[j][0] == -1)
                     return new int[] {j, 0};
             }
             for(int j = 0; j < 3; j++)
             {
-                if(numBoard[0][j] == numBoard[1][j] && numBoard[0][j] == (turnNum + i) % 2)
+                if(numBoard[0][j] == numBoard[1][j] && numBoard[0][j] == (turnNum + i) % 2 && numBoard[2][j] == -1)
                     return new int[] {2, j};
-                if(numBoard[0][j] == numBoard[2][j] && numBoard[0][j] == (turnNum + i) % 2)
+                if(numBoard[0][j] == numBoard[2][j] && numBoard[0][j] == (turnNum + i) % 2 && numBoard[1][j] == -1)
                     return new int[] {1, j};
-                if(numBoard[2][j] == numBoard[1][j] && numBoard[2][j] == (turnNum + i) % 2)
+                if(numBoard[2][j] == numBoard[1][j] && numBoard[2][j] == (turnNum + i) % 2 && numBoard[0][j] == -1)
                     return new int[] {0, j};
             }
+            if(numBoard[0][0] == numBoard[1][1] && numBoard[0][0] == (turnNum + i) % 2 && numBoard[2][2] == -1)
+                return new int[] {2, 2};
+            if(numBoard[0][0] == numBoard[2][2] && numBoard[0][0] == (turnNum + i) % 2 && numBoard[1][1] == -1)
+                return new int[] {1, 1};
+            if(numBoard[2][2] == numBoard[1][1] && numBoard[2][2] == (turnNum + i) % 2 && numBoard[0][0] == -1)
+                return new int[] {0, 0};
+            if(numBoard[0][2] == numBoard[1][1] && numBoard[0][2] == (turnNum + i) % 2 && numBoard[2][0] == -1)
+                return new int[] {2, 0};
+            if(numBoard[0][2] == numBoard[2][0] && numBoard[0][2] == (turnNum + i) % 2 && numBoard[1][1] == -1)
+                return new int[] {1, 1};
+            if(numBoard[2][0] == numBoard[1][1] && numBoard[2][0] == (turnNum + i) % 2 && numBoard[0][2] == -1)
+                return new int[] {0, 2};
         }
         return null;
+    }
+
+    public static int[] calculateFitness(int turn)
+    {
+        int[][] fitness = new int[3][3];
+        int[][] temp = Arrays.copyOf(numBoard, numBoard.length);
+        for(int i = 0; i < temp.length; i++)
+        {
+            for(int j = 0; j < temp[i].length; j++)
+            {
+                if(temp[i][j] != -1)
+                {
+                    fitness[i][j] = -1;
+                    continue;
+                }
+                temp[i][j] = turn;
+                int numThreats = 0;
+                if(i == 0)
+                {
+                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[2][j]) && (temp[1][j] != 1 - turn || temp[2][j] != 1 - turn))
+                        numThreats++;
+                }
+            }
+        }
     }
 
     public static void displayBoard()
