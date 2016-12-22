@@ -1,6 +1,7 @@
 package com.company;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import java.util.Scanner;
 
@@ -66,7 +67,6 @@ public class Main
                         {
                             numBoard[row - 1][column - 1] = p1Turn ? 0 : 1;
                             board[row - 1][column - 1] = p1Turn ? p1Letter : p2Letter;
-                            turns++;
                         }
                         break;
                     }
@@ -86,26 +86,44 @@ public class Main
                     numBoard[row][column] = p1Turn ? 0 : 1;
                     board[row][column] = p1Turn ? p1Letter : p2Letter;
                 }
-                int[] play = p1Turn ? forcedPlay(0) : forcedPlay(1);
-                if(play != null)
+                else
                 {
-                    numBoard[play[0]][play[1]] = p1Turn ? 0 : 1;
-                    board[play[0]][play[1]] = p1Turn ? p1Letter : p2Letter;
-                }
-                else if(true)
-                {
-                    int[] bestPlay = p1Turn ? calculateFitness(0) : calculateFitness(1);
+                    int[] play = p1Turn ? forcedPlay(0) : forcedPlay(1);
+                    if(play != null)
+                    {
+                        numBoard[play[0]][play[1]] = p1Turn ? 0 : 1;
+                        board[play[0]][play[1]] = p1Turn ? p1Letter : p2Letter;
+                    } else if(true)
+                    {
+                        int[] bestPlay = p1Turn ? calculateFitness(0) : calculateFitness(1);
+                        /*while(true)
+                        {
+                            int x = (int) (Math.random() * 3);
+                            int y = (int) (Math.random() * 3);
+                            if(numBoard[x][y] == -1)
+                            {
+                                numBoard[x][y] = p1Turn ? 0 : 1;
+                                board[x][y] = p1Turn ? p1Letter : p2Letter;
+                                break;
+                            }
+                        }*/
+                        numBoard[bestPlay[0]][bestPlay[1]] = p1Turn ? 0 : 1;
+                        board[bestPlay[0]][bestPlay[1]] = p1Turn ? p1Letter : p2Letter;
+                    }
                 }
                 System.out.println("Computer plays! Your turn!\n");
                 p1Turn = !p1Turn;
             }
+            turns++;
             winner = findWinner();
             displayBoard();
         }
         if(winner.equals(p1Letter))
             System.out.println("Player 1 wins!");
-        if(winner.equals(p2Letter))
+        else if(winner.equals(p2Letter))
             System.out.println("Player 2 wins!");
+        else
+            System.out.println("It's a draw!");
     }
 
     public static int[] forcedPlay(int turnNum)
@@ -161,13 +179,110 @@ public class Main
                 }
                 temp[i][j] = turn;
                 int numThreats = 0;
+                int numOpens = 0;
                 if(i == 0)
                 {
-                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[2][j]) && (temp[1][j] != 1 - turn || temp[2][j] != 1 - turn))
+                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[2][j]) && !(temp[1][j] == 1 - turn || temp[2][j] == 1 - turn))
                         numThreats++;
+                    if(!(temp[1][j] == 1 - turn || temp[2][j] == 1 - turn))
+                        numOpens++;
+                    if(j == 0)
+                    {
+                        if((temp[i][j] == temp[1][1] || temp[i][j] == temp[2][2]) && !(temp[1][1] == 1 - turn || temp[2][2] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[1][1] == 1 - turn || temp[2][2] == 1 - turn))
+                            numOpens++;
+                    }
+                    if(j == 2)
+                    {
+                        if((temp[i][j] == temp[1][1] || temp[i][j] == temp[2][0]) && !(temp[1][1] == 1 - turn || temp[2][0] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[1][1] == 1 - turn || temp[2][0] == 1 - turn))
+                            numOpens++;
+                    }
                 }
+                if(i == 1)
+                {
+                    if((temp[i][j] == temp[0][j] || temp[i][j] == temp[2][j]) && !(temp[0][j] == 1 - turn || temp[2][j] == 1 - turn))
+                        numThreats++;
+                    if(!(temp[0][j] == 1 - turn || temp[2][j] == 1 - turn))
+                        numOpens++;
+                    if(j == 1)
+                    {
+                        if((temp[i][j] == temp[0][0] || temp[i][j] == temp [2][2]) && !(temp[0][0] == 1 - turn || temp[2][2] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[0][0] == 1 - turn || temp[2][2] == 1 - turn))
+                            numOpens++;
+                        if((temp[i][j] == temp[0][2] || temp[i][j] == temp[2][0]) && !(temp[0][2] == 1 - turn || temp[2][0] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[0][2] == 1 - turn || temp[2][0] == 1 - turn))
+                            numOpens++;
+                    }
+                }
+                if(i == 2)
+                {
+                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[0][j]) && !(temp[1][j] == 1 - turn || temp[0][j] == 1 - turn))
+                        numThreats++;
+                    if(!(temp[1][j] == 1 - turn || temp[0][j] == 1 - turn))
+                        numOpens++;
+                    if(j == 0)
+                    {
+                        if((temp[i][j] == temp[0][2] || temp[i][j] == temp[1][1]) && !(temp[0][2] == 1 - turn || temp[1][1] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[0][2] == 1 - turn || temp[1][1] == 1 - turn))
+                            numOpens++;
+                    }
+                    if(j == 2)
+                    {
+                        if((temp[i][j] == temp[0][0] || temp[i][j] == temp[1][1]) && !(temp[0][0] == 1 - turn || temp[1][1] == 1 - turn))
+                            numThreats++;
+                        if(!(temp[0][0] == 1 - turn || temp[1][1] == 1 - turn))
+                            numOpens++;
+                    }
+                }
+                if(j == 0)
+                {
+                    if((temp[i][j] == temp[i][1] || temp[i][j] == temp[i][2]) && !(temp[i][1] == 1 - turn || temp[i][2] == 1 - turn))
+                        numThreats++;
+                    if(!(temp[i][1] == 1 - turn || temp[i][2] == 1 - turn))
+                        numOpens++;
+                }
+                if(j == 1)
+                {
+                    if((temp[i][j] == temp[i][0] || temp[i][j] == temp[i][2]) && !(temp[i][0] == 1 - turn || temp[i][2] == 1 - turn))
+                        numThreats++;
+                    if(!(temp[i][0] == 1 - turn || temp[i][2] == 1 - turn))
+                        numOpens++;
+                }
+                if(j == 2)
+                {
+                    if((temp[i][j] == temp[i][1] || temp[i][j] == temp[i][0]) && !(temp[i][1] == 1 - turn || temp[i][0] == 1 - turn))
+                        numThreats++;
+                    if(!(temp[i][1] == 1 - turn || temp[i][0] == 1 - turn))
+                        numOpens++;
+                }
+                fitness[i][j] = numThreats + numOpens;
             }
         }
+        ArrayList<int[]> results = new ArrayList<>();
+        int maxFitness = 0;
+        for(int i = 0; i < fitness.length; i++)
+        {
+            for(int j = 0; j < fitness[i].length; j++)
+            {
+                if(fitness[i][j] > maxFitness)
+                    maxFitness = fitness[i][j];
+            }
+        }
+        for(int i = 0; i < fitness.length; i++)
+        {
+            for(int j = 0; j < fitness[i].length; j++)
+            {
+                if(fitness[i][j] == maxFitness)
+                    results.add(new int[] {i, j});
+            }
+        }
+        return results.get((int)(Math.random() * results.size()));
     }
 
     public static void displayBoard()
@@ -198,6 +313,15 @@ public class Main
             return board[0][0];
         else if(numBoard[0][2] == numBoard[1][1] && numBoard[1][1] == numBoard[2][0] && numBoard[0][2] != -1)
             return board[0][2];
+        else
+            topLoop: for(int i = 0; i < numBoard.length; i++)
+                for(int j = 0; j < numBoard[i].length; j++)
+                {
+                    if(numBoard[i][j] == -1)
+                        break topLoop;
+                    if(i == 2 && j == 2)
+                        return "draw";
+                }
         return null;
     }
 }
