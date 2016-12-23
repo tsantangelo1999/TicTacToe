@@ -45,9 +45,9 @@ public class Main
         String p2Letter = "O";
         String winner = null;
         int turns = 0;
-        displayBoard();
         while(winner == null)
         {
+            displayBoard();
             if(p1Turn && p1Human || !p1Turn && p2Human)
             {
                 while(true)
@@ -116,8 +116,8 @@ public class Main
             }
             turns++;
             winner = findWinner();
-            displayBoard();
         }
+        displayBoard();
         if(winner.equals(p1Letter))
             System.out.println("Player 1 wins!");
         else if(winner.equals(p2Letter))
@@ -130,7 +130,7 @@ public class Main
     {
         for(int i = 0; i <= 1; i++)
         {
-            for(int j = 0; j < 3; j++)
+            /*for(int j = 0; j < 3; j++)
             {
                 if(numBoard[j][0] == numBoard[j][1] && numBoard[j][0] == (turnNum + i) % 2 && numBoard[j][2] == -1)
                     return new int[] {j, 2};
@@ -159,7 +159,26 @@ public class Main
             if(numBoard[0][2] == numBoard[2][0] && numBoard[0][2] == (turnNum + i) % 2 && numBoard[1][1] == -1)
                 return new int[] {1, 1};
             if(numBoard[2][0] == numBoard[1][1] && numBoard[2][0] == (turnNum + i) % 2 && numBoard[0][2] == -1)
-                return new int[] {0, 2};
+                return new int[] {0, 2};*/
+            for (int j = 0; j < numBoard.length; j++)
+            {
+                for (int k = 0; k < numBoard[j].length; k++)
+                {
+                    if(numBoard[j][k] == numBoard[j][(k + 1) % 3] && numBoard[j][k] == (turnNum + i) % 2 && numBoard[j][(k + 2) % 3] == -1)
+                        return new int[] {j, (k + 2) % 3};
+                    if(numBoard[j][k] == numBoard[(j + 1) % 3][k] && numBoard[j][k] == (turnNum + i) % 2 && numBoard[(j + 2) % 3][k] == -1)
+                        return new int[] {(j + 2) % 3, k};
+                    if((j + k) % 2 == 0)
+                    {
+                        if(j == k)
+                            if(numBoard[j][k] == numBoard[(j + 1) % 3][(k + 1) % 3] && numBoard[j][k] == (turnNum + i) % 2 && numBoard[(j + 2) % 3][(k + 2) % 3] == -1)
+                                return new int[] {(j + 2) % 3, (k + 2) % 3};
+                        if(j != k || j == 1)
+                            if(numBoard[j][k] == numBoard[(j + 1) % 3][(k + 2) % 3] && numBoard[j][k] == (turnNum + i) % 2 && numBoard[(j + 2) % 3][(k + 1) % 3] == -1)
+                                return new int[] {(j + 2) % 3, (k + 1) % 3};
+                    }
+                }
+            }
         }
         return null;
     }
@@ -167,7 +186,14 @@ public class Main
     public static int[] calculateFitness(int turn)
     {
         int[][] fitness = new int[3][3];
-        int[][] temp = Arrays.copyOf(numBoard, numBoard.length);
+        int[][] temp = new int[3][3];
+        for (int i = 0; i < temp.length; i++)
+        {
+            for (int j = 0; j < temp[i].length; j++)
+            {
+                temp[i][j] = numBoard[i][j];
+            }
+        }
         for(int i = 0; i < temp.length; i++)
         {
             for(int j = 0; j < temp[i].length; j++)
@@ -180,88 +206,39 @@ public class Main
                 temp[i][j] = turn;
                 int numThreats = 0;
                 int numOpens = 0;
-                if(i == 0)
+                if((temp[i][j] == temp[i][(j + 1) % 3] || temp[i][j] == temp[i][(j + 2) % 3]) && !(temp[i][(j + 1) % 3] == turn - 1 || temp[i][(j + 2) % 3] == turn - 1))
+                    numThreats++;
+                if(!(temp[i][(j + 1) % 3] == turn - 1 || temp[i][(j + 2) % 3] == turn - 1))
+                    numOpens++;
+                if((temp[i][j] == temp[(i + 1) % 3][j] || temp[i][j] == temp[(i + 2) % 3][j]) && !(temp[(i + 1) % 3][j] == turn - 1 || temp[(i + 2) % 3][j] == turn - 1))
+                    numThreats++;
+                if(!(temp[(i + 1) % 3][j] == turn - 1 || temp[(i + 2) % 3][j] == turn - 1))
+                    numOpens++;
+                if((i + j) % 2 == 0)
                 {
-                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[2][j]) && !(temp[1][j] == 1 - turn || temp[2][j] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[1][j] == 1 - turn || temp[2][j] == 1 - turn))
-                        numOpens++;
-                    if(j == 0)
+                    if(i == j)
                     {
-                        if((temp[i][j] == temp[1][1] || temp[i][j] == temp[2][2]) && !(temp[1][1] == 1 - turn || temp[2][2] == 1 - turn))
+                        if((temp[i][j] == temp[(i + 1) % 3][(j + 1) % 3] || temp[i][j] == temp[(i + 2) % 3][(j + 2) % 3]) && !(temp[(i + 1) % 3][(j + 1) % 3] == turn - 1 || temp[(i + 2) % 3][(j + 2) % 3] == turn - 1))
                             numThreats++;
-                        if(!(temp[1][1] == 1 - turn || temp[2][2] == 1 - turn))
+                        if(!(temp[(i + 1) % 3][(j + 1) % 3] == turn - 1 || temp[(i + 2) % 3][(j + 2) % 3] == turn - 1))
                             numOpens++;
                     }
-                    if(j == 2)
+                    if(i != j || i == 1)
                     {
-                        if((temp[i][j] == temp[1][1] || temp[i][j] == temp[2][0]) && !(temp[1][1] == 1 - turn || temp[2][0] == 1 - turn))
+                        if((temp[i][j] == temp[(i + 1) % 3][(j + 2) % 3] || temp[i][j] == temp[(i + 2) % 3][(j + 1) % 3]) && !(temp[(i + 1) % 3][(j + 2) % 3] == turn - 1 || temp[(i + 2) % 3][(j + 1) % 3] == turn - 1))
                             numThreats++;
-                        if(!(temp[1][1] == 1 - turn || temp[2][0] == 1 - turn))
+                        if(!(temp[(i + 1) % 3][(j + 2) % 3] == turn - 1 || temp[(i + 2) % 3][(j + 1) % 3] == turn - 1))
                             numOpens++;
                     }
-                }
-                if(i == 1)
-                {
-                    if((temp[i][j] == temp[0][j] || temp[i][j] == temp[2][j]) && !(temp[0][j] == 1 - turn || temp[2][j] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[0][j] == 1 - turn || temp[2][j] == 1 - turn))
-                        numOpens++;
-                    if(j == 1)
-                    {
-                        if((temp[i][j] == temp[0][0] || temp[i][j] == temp [2][2]) && !(temp[0][0] == 1 - turn || temp[2][2] == 1 - turn))
-                            numThreats++;
-                        if(!(temp[0][0] == 1 - turn || temp[2][2] == 1 - turn))
-                            numOpens++;
-                        if((temp[i][j] == temp[0][2] || temp[i][j] == temp[2][0]) && !(temp[0][2] == 1 - turn || temp[2][0] == 1 - turn))
-                            numThreats++;
-                        if(!(temp[0][2] == 1 - turn || temp[2][0] == 1 - turn))
-                            numOpens++;
-                    }
-                }
-                if(i == 2)
-                {
-                    if((temp[i][j] == temp[1][j] || temp[i][j] == temp[0][j]) && !(temp[1][j] == 1 - turn || temp[0][j] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[1][j] == 1 - turn || temp[0][j] == 1 - turn))
-                        numOpens++;
-                    if(j == 0)
-                    {
-                        if((temp[i][j] == temp[0][2] || temp[i][j] == temp[1][1]) && !(temp[0][2] == 1 - turn || temp[1][1] == 1 - turn))
-                            numThreats++;
-                        if(!(temp[0][2] == 1 - turn || temp[1][1] == 1 - turn))
-                            numOpens++;
-                    }
-                    if(j == 2)
-                    {
-                        if((temp[i][j] == temp[0][0] || temp[i][j] == temp[1][1]) && !(temp[0][0] == 1 - turn || temp[1][1] == 1 - turn))
-                            numThreats++;
-                        if(!(temp[0][0] == 1 - turn || temp[1][1] == 1 - turn))
-                            numOpens++;
-                    }
-                }
-                if(j == 0)
-                {
-                    if((temp[i][j] == temp[i][1] || temp[i][j] == temp[i][2]) && !(temp[i][1] == 1 - turn || temp[i][2] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[i][1] == 1 - turn || temp[i][2] == 1 - turn))
-                        numOpens++;
-                }
-                if(j == 1)
-                {
-                    if((temp[i][j] == temp[i][0] || temp[i][j] == temp[i][2]) && !(temp[i][0] == 1 - turn || temp[i][2] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[i][0] == 1 - turn || temp[i][2] == 1 - turn))
-                        numOpens++;
-                }
-                if(j == 2)
-                {
-                    if((temp[i][j] == temp[i][1] || temp[i][j] == temp[i][0]) && !(temp[i][1] == 1 - turn || temp[i][0] == 1 - turn))
-                        numThreats++;
-                    if(!(temp[i][1] == 1 - turn || temp[i][0] == 1 - turn))
-                        numOpens++;
                 }
                 fitness[i][j] = numThreats + numOpens;
+                if(numThreats > 1)
+                    return new int[] {i, j};
+                if(numThreats == 1)
+                {
+
+                }
+                temp[i][j] = -1;
             }
         }
         ArrayList<int[]> results = new ArrayList<>();
