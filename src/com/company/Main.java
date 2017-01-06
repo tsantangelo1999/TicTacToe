@@ -3,7 +3,7 @@ package com.company;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Main
+public class Main //heres me code pls no touch
 {
     private static String[][] board = {{" ", " ", " "}, {" ", " ", " "}, {" ", " ", " "}};
     private static int[][] numBoard = {{-1, -1, -1}, {-1, -1, -1}, {-1, -1, -1}};
@@ -79,8 +79,8 @@ public class Main
             {
                 if(turns == 0)
                 {
-                    int row = 2;//(int)(Math.random() * 2) * 2;
-                    int column = 0;//(int)(Math.random() * 2) * 2;
+                    int row = (int)(Math.random() * 2) * 2;
+                    int column = (int)(Math.random() * 2) * 2;
                     numBoard[row][column] = p1Turn ? 0 : 1;
                     board[row][column] = p1Turn ? p1Letter : p2Letter;
                 }
